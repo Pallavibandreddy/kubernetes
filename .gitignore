@@ -4,11 +4,7 @@
 *.tfstate.*
 crash.log
 crash.*.log
-
-# Terraform variables - may contain secrets
 *.tfvars
-
-# Keep lock file
 !.terraform.lock.hcl
 
 # Python
@@ -17,9 +13,12 @@ __pycache__/
 .venv/
 venv/
 
-# Environment files
+# Environment
 .env
 .env.*
 
 # Docker
 *.log
+
+# GitHub OIDC local file
+github-federation.json
