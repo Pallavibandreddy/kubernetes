@@ -1,6 +1,6 @@
 resource_group_name         = "pallavi-rg"
 location                    = "Central India"
-vnet_name                   = "pallavi vnet"
+vnet_name                   = "pallavi-vnet"
 acr_name                    = "pallaviacr"
 aks_name                    = "pallavi-aks"
 aks_dns_prefix              = "aks-demo"
