@@ -31,6 +31,15 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Prepare Terraform variables
+        working-directory: terraform
+        env:
+          TF_POSTGRES_ADMIN_PASSWORD: ${{ secrets.TF_POSTGRES_ADMIN_PASSWORD }}
+        run: |
+          cp terraform.tfvars.example terraform.tfvars
+
+          echo 'postgres_admin_password = "'"$TF_POSTGRES_ADMIN_PASSWORD"'"' >> terraform.tfvars
+
       - name: Terraform Init
         working-directory: terraform
         run: terraform init
