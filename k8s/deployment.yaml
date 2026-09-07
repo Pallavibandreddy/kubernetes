@@ -29,3 +29,21 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+env:
+  - name: DB_HOST
+    value: "pallavi.postgres.database.azure.com"
+
+  - name: DB_PORT
+    value: "5432"
+
+  - name: DB_NAME
+    value: "myapp"
+
+  - name: DB_USER
+    value: "pgadmin"
+
+  - name: DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: postgres-secret
+        key: password

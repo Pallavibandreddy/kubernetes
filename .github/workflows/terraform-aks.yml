@@ -120,6 +120,17 @@ jobs:
             --name pallavi-aks \
             --overwrite-existing
 
+      # Create Secret BEFORE Deployment
+      - name: Create PostgreSQL Secret
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.TF_POSTGRES_ADMIN_PASSWORD }}
+        run: |
+          kubectl create secret generic postgres-secret \
+            --namespace python-app \
+            --from-literal=password="$POSTGRES_PASSWORD" \
+            --dry-run=client \
+            -o yaml | kubectl apply -f -
+
       - name: Apply Kubernetes Manifests
         run: |
           kubectl apply -f k8s/namespace.yaml
@@ -137,7 +148,6 @@ jobs:
           kubectl rollout status deployment/python-app \
             -n python-app \
             --timeout=300s
-
 
   # ==============================
   # STAGE 4 - VERIFY
