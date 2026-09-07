@@ -42,3 +42,11 @@ variable "postgres_database_name" {
 variable "application_gateway_name" {
   type = string
 }
+
+variable "aks_service_cidr" {
+  type = string
+}
+
+variable "aks_dns_service_ip" {
+  type = string
+}

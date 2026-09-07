@@ -41,3 +41,11 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+variable "service_cidr" {
+  type = string
+}
+
+variable "dns_service_ip" {
+  type = string
+}
