@@ -1,8 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: python-app
   namespace: python-app
+
 spec:
   replicas: 2
 
@@ -19,31 +21,34 @@ spec:
       containers:
         - name: python-app
           image: pallaviacr.azurecr.io/python-k8s-app:v1
+
           ports:
             - containerPort: 8000
+
+          env:
+            - name: DB_HOST
+              value: "pallavi.postgres.database.azure.com"
+
+            - name: DB_PORT
+              value: "5432"
+
+            - name: DB_NAME
+              value: "myapp"
+
+            - name: DB_USER
+              value: "pgadmin"
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
 
           resources:
             requests:
               cpu: "100m"
               memory: "128Mi"
+
             limits:
               cpu: "500m"
               memory: "512Mi"
-env:
-  - name: DB_HOST
-    value: "pallavi.postgres.database.azure.com"
-
-  - name: DB_PORT
-    value: "5432"
-
-  - name: DB_NAME
-    value: "myapp"
-
-  - name: DB_USER
-    value: "pgadmin"
-
-  - name: DB_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: postgres-secret
-        key: password
