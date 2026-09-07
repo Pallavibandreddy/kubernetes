@@ -119,7 +119,10 @@ jobs:
             --resource-group pallavi-rg \
             --name pallavi-aks \
             --overwrite-existing
-
+      - name: Create Namespace
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          
       # Create Secret BEFORE Deployment
       - name: Create PostgreSQL Secret
         env:
