@@ -1,4 +1,4 @@
-name: Terraform AKS Infrastructure
+name: Terraform AKS Infrastructure and Application Deployment
 
 on:
   push:
@@ -13,14 +13,16 @@ permissions:
 
 jobs:
   terraform:
-    name: Terraform
+    name: Terraform and AKS Deployment
     runs-on: ubuntu-latest
 
     steps:
 
+      # 1. Checkout source code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Login to Azure using OIDC
       - name: Azure Login using OIDC
         uses: azure/login@v2
         with:
@@ -28,9 +30,11 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
+      # 3. Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # 4. Prepare Terraform variables
       - name: Prepare Terraform variables
         working-directory: terraform
         env:
@@ -38,18 +42,75 @@ jobs:
         run: |
           cp terraform.tfvars.example terraform.tfvars
           printf '\npostgres_admin_password = "%s"\n' "$TF_POSTGRES_ADMIN_PASSWORD" >> terraform.tfvars
+
+      # 5. Terraform Init
       - name: Terraform Init
         working-directory: terraform
         run: terraform init
 
+      # 6. Terraform Validate
       - name: Terraform Validate
         working-directory: terraform
         run: terraform validate
 
+      # 7. Terraform Plan
       - name: Terraform Plan
         working-directory: terraform
         run: terraform plan
 
+      # 8. Terraform Apply
       - name: Terraform Apply
         working-directory: terraform
         run: terraform apply -auto-approve
+
+      # 9. Login to Azure Container Registry
+      - name: Login to ACR
+        run: |
+          az acr login --name pallaviacr
+
+      # 10. Build Docker image
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -t pallaviacr.azurecr.io/python-k8s-app:${{ github.sha }} \
+            .
+
+      # 11. Push Docker image to ACR
+      - name: Push Docker Image to ACR
+        run: |
+          docker push pallaviacr.azurecr.io/python-k8s-app:${{ github.sha }}
+
+      # 12. Get AKS credentials
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials \
+            --resource-group pallavi-rg \
+            --name pallavi-aks \
+            --overwrite-existing
+
+      # 13. Deploy Kubernetes manifests
+      - name: Deploy Application to AKS
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+
+      # 14. Update deployment image
+      - name: Update Deployment Image
+        run: |
+          kubectl set image deployment/python-app \
+            python-app=pallaviacr.azurecr.io/python-k8s-app:${{ github.sha }} \
+            -n python-app
+
+      # 15. Wait for deployment
+      - name: Wait for Rollout
+        run: |
+          kubectl rollout status deployment/python-app \
+            -n python-app \
+            --timeout=300s
+
+      # 16. Verify Kubernetes resources
+      - name: Verify Deployment
+        run: |
+          kubectl get pods -n python-app
+          kubectl get services -n python-app
