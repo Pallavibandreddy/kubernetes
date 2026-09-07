@@ -1,3 +1,7 @@
+# ============================================================
+# BACKEND DEPLOYMENT
+# ============================================================
+
 apiVersion: apps/v1
 kind: Deployment
 
@@ -20,6 +24,7 @@ spec:
     spec:
       containers:
         - name: python-app
+
           image: pallaviacr.azurecr.io/python-k8s-app:v1
 
           ports:
@@ -52,3 +57,47 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+
+
+---
+
+# ============================================================
+# FRONTEND DEPLOYMENT
+# ============================================================
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: frontend
+  namespace: python-app
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: frontend
+
+  template:
+    metadata:
+      labels:
+        app: frontend
+
+    spec:
+      containers:
+        - name: frontend
+
+          image: pallaviacr.azurecr.io/frontend-app:v1
+
+          ports:
+            - containerPort: 80
+
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
