@@ -1,4 +1,4 @@
-const API_URL = "http://4.224.6.128";
+const API_URL = "";
 
 const form = document.getElementById("userForm");
 const message = document.getElementById("message");

@@ -49,3 +49,16 @@ variable "service_cidr" {
 variable "dns_service_ip" {
   type = string
 }
+
+variable "application_gateway_id" {
+  type = string
+}
+
+
+variable "resource_group_id" {
+  type = string
+}
+
+variable "application_gateway_subnet_id" {
+  type = string
+}

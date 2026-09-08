@@ -165,14 +165,29 @@ jobs:
             -o yaml | kubectl apply -f -
 
       # --------------------------------------------------------
-      # KUBERNETES MANIFESTS
+      # KUBERNETES DEPLOYMENTS
       # --------------------------------------------------------
 
-      - name: Apply Kubernetes Manifests
+      - name: Apply Kubernetes Deployments
         run: |
           kubectl apply -f k8s/deployment.yaml
+
+      # --------------------------------------------------------
+      # KUBERNETES SERVICES
+      # --------------------------------------------------------
+
+      - name: Apply Kubernetes Services
+        run: |
           kubectl apply -f k8s/service.yaml
           kubectl apply -f k8s/frontend-service.yaml
+
+      # --------------------------------------------------------
+      # INGRESS
+      # --------------------------------------------------------
+
+      - name: Apply Kubernetes Ingress
+        run: |
+          kubectl apply -f k8s/ingress.yaml
 
       # --------------------------------------------------------
       # UPDATE BACKEND IMAGE
@@ -214,6 +229,26 @@ jobs:
             -n python-app \
             --timeout=300s
 
+      # --------------------------------------------------------
+      # WAIT FOR AGIC
+      # --------------------------------------------------------
+
+      - name: Wait for Ingress Address
+        run: |
+          for i in {1..30}; do
+            ADDRESS=$(kubectl get ingress python-app-ingress \
+              -n python-app \
+              -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+            if [ -n "$ADDRESS" ]; then
+              echo "Application Gateway IP: $ADDRESS"
+              break
+            fi
+
+            echo "Waiting for Application Gateway..."
+            sleep 10
+          done
+
 
   # ==========================================================
   # STAGE 4 - VERIFY
@@ -243,7 +278,7 @@ jobs:
       # VERIFY PODS
       # --------------------------------------------------------
 
-      - name: Verify All Pods
+      - name: Verify Pods
         run: |
           kubectl get pods -n python-app
 
@@ -256,17 +291,37 @@ jobs:
           kubectl get deployments -n python-app
 
       # --------------------------------------------------------
-      # VERIFY BACKEND SERVICE
+      # VERIFY SERVICES
       # --------------------------------------------------------
 
-      - name: Verify Backend Service
+      - name: Verify Services
         run: |
-          kubectl get service python-app-service -n python-app
+          kubectl get services -n python-app
 
       # --------------------------------------------------------
-      # VERIFY FRONTEND SERVICE
+      # VERIFY INGRESS
       # --------------------------------------------------------
 
-      - name: Verify Frontend Service
+      - name: Verify Ingress
         run: |
-          kubectl get service frontend-service -n python-app
+          kubectl get ingress -n python-app
+
+      # --------------------------------------------------------
+      # VERIFY ENDPOINTS
+      # --------------------------------------------------------
+
+      - name: Verify Endpoints
+        run: |
+          kubectl get endpoints -n python-app
+
+      # --------------------------------------------------------
+      # VERIFY APPLICATION GATEWAY
+      # --------------------------------------------------------
+
+      - name: Verify Application Gateway
+        run: |
+          az network application-gateway show \
+            --resource-group pallavi-rg \
+            --name pallavi-appgw \
+            --query "{name:name,frontendIP:frontendIPConfigurations[0].publicIPAddress.id}" \
+            -o json

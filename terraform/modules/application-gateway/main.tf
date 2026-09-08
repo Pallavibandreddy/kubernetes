@@ -40,14 +40,13 @@ resource "azurerm_application_gateway" "this" {
   }
 
   backend_address_pool {
-    name         = "aks-backend"
-    ip_addresses = var.backend_ip_addresses
+    name = "aks-backend"
   }
 
   backend_http_settings {
     name                  = "http-settings"
     cookie_based_affinity = "Disabled"
-    port                  = var.backend_port
+    port                  = 80
     protocol              = "Http"
     request_timeout       = 60
   }

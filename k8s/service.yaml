@@ -4,11 +4,9 @@ metadata:
   name: python-app-service
   namespace: python-app
 spec:
-  type: LoadBalancer
-
+  type: ClusterIP
   selector:
     app: python-app
-
   ports:
     - protocol: TCP
       port: 80
