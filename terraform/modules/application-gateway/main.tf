@@ -14,6 +14,18 @@ resource "azurerm_application_gateway" "this" {
   resource_group_name = var.resource_group_name
   location            = var.location
 
+  lifecycle {
+    ignore_changes = [
+      backend_address_pool,
+      backend_http_settings,
+      http_listener,
+      probe,
+      request_routing_rule,
+      url_path_map,
+      tags
+    ]
+  }
+
   sku {
     name = "Standard_v2"
     tier = "Standard_v2"

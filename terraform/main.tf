@@ -100,20 +100,15 @@ module "sql" {
   resource_group_name = module.rg.name
   location            = module.rg.location
 
-  vnet_id             = module.network.vnet_id
-  delegated_subnet_id = module.network.postgres_subnet_id
-  admin_username      = var.postgres_admin_username
-  admin_password      = var.postgres_admin_password
+  admin_username = var.postgres_admin_username
+  admin_password = var.postgres_admin_password
 
   database_name = var.postgres_database_name
 
   postgres_version = "16"
-
-  storage_mb = 32768
-
-  sku_name = "B_Standard_B1ms"
-
-  zone = "1"
+  storage_mb       = 32768
+  sku_name         = "B_Standard_B1ms"
+  zone             = "1"
 
   tags = {
     project = "aks-kubernetes"
@@ -121,6 +116,25 @@ module "sql" {
   }
 }
 
+module "private_endpoint" {
+  source = "./modules/private-endpoint"
+
+  name                = "pallavi-postgres-pe"
+  location            = module.rg.location
+  resource_group_name = module.rg.name
+
+  subnet_id = module.network.private_endpoint_subnet_id
+  vnet_id   = module.network.vnet_id
+
+  private_connection_resource_id = module.sql.server_id
+
+  subresource_names = ["postgresqlServer"]
+
+  tags = {
+    project = "aks-kubernetes"
+    env     = "dev"
+  }
+}
 
 module "application_gateway" {
   source = "./modules/application-gateway"

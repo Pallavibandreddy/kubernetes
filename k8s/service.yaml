@@ -4,7 +4,7 @@ metadata:
   name: python-app-service
   namespace: python-app
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: python-app
   ports:

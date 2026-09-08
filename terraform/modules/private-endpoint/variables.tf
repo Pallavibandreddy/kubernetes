@@ -14,6 +14,10 @@ variable "subnet_id" {
   type = string
 }
 
+variable "vnet_id" {
+  type = string
+}
+
 variable "private_connection_resource_id" {
   type = string
 }

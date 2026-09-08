@@ -10,14 +10,6 @@ variable "location" {
   type = string
 }
 
-variable "vnet_id" {
-  type = string
-}
-
-variable "delegated_subnet_id" {
-  type = string
-}
-
 variable "postgres_version" {
   type    = string
   default = "16"
